@@ -1,0 +1,82 @@
+{% extends 'camila/base.html' %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+  <h1 class="text-3xl font-bold mb-6">Dashboard - Docente</h1>
+
+  <!-- Estadísticas rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-blue-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-blue-800">Total Reservas</h3>
+      <p class="text-3xl font-bold text-blue-600">{{ total_reservas }}</p>
+    </div>
+    <div class="bg-yellow-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-yellow-800">Pendientes</h3>
+      <p class="text-3xl font-bold text-yellow-600">{{ pendientes }}</p>
+    </div>
+    <div class="bg-green-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-green-800">Aprobadas</h3>
+      <p class="text-3xl font-bold text-green-600">{{ aprobadas }}</p>
+    </div>
+    <div class="bg-red-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-red-800">Rechazadas</h3>
+      <p class="text-3xl font-bold text-red-600">{{ rechazadas }}</p>
+    </div>
+  </div>
+
+  <!-- Reservas recientes -->
+  <div class="mt-6">
+    <h2 class="text-2xl font-bold mb-4">Reservas Recientes</h2>
+
+    {% if reservas_recientes %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-4 py-2 text-left">Laboratorio</th>
+              <th class="px-4 py-2 text-left">Fecha</th>
+              <th class="px-4 py-2 text-left">Horario</th>
+              <th class="px-4 py-2 text-left">Estado</th>
+              <th class="px-4 py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reserva in reservas_recientes %}
+            <tr class="border-t">
+              <td class="px-4 py-2">{{ reserva.laboratorio.nombre }}</td>
+              <td class="px-4 py-2">{{ reserva.fecha }}</td>
+              <td class="px-4 py-2">{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+              <td class="px-4 py-2">
+                <span class="px-2 py-1 rounded text-sm
+                  {% if reserva.estado == 'Pendiente' %}bg-yellow-200 text-yellow-800
+                  {% elif reserva.estado == 'Aprobada' %}bg-green-200 text-green-800
+                  {% elif reserva.estado == 'Rechazada' %}bg-red-200 text-red-800
+                  {% else %}bg-gray-200 text-gray-800{% endif %}">
+                  {{ reserva.estado }}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-center">
+                <a href="{% url 'camila:docente_reserva_detail' reserva.pk %}" class="text-blue-600 hover:underline">Ver</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600">No tienes reservas aún.</p>
+    {% endif %}
+
+    <div class="mt-4">
+      <a href="{% url 'camila:docente_reserva_list' %}" class="text-blue-600 hover:underline">Ver todas mis reservas →</a>
+    </div>
+  </div>
+
+  <!-- Botón para crear nueva reserva -->
+  <div class="mt-6">
+    <a href="{% url 'camila:docente_reserva_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+      Nueva Reserva
+    </a>
+  </div>
+</div>
+{% endblock %}

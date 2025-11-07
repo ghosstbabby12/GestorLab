@@ -1,0 +1,82 @@
+{% extends 'camila/base.html' %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+  <h1 class="text-3xl font-bold mb-6">Dashboard - Administrador</h1>
+
+  <!-- Estadísticas rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-blue-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-blue-800">Total Reservas</h3>
+      <p class="text-3xl font-bold text-blue-600">{{ total_reservas }}</p>
+    </div>
+    <div class="bg-yellow-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-yellow-800">Pendientes</h3>
+      <p class="text-3xl font-bold text-yellow-600">{{ pendientes }}</p>
+    </div>
+    <div class="bg-green-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-green-800">Aprobadas</h3>
+      <p class="text-3xl font-bold text-green-600">{{ aprobadas }}</p>
+    </div>
+    <div class="bg-red-100 p-4 rounded">
+      <h3 class="text-lg font-semibold text-red-800">Rechazadas</h3>
+      <p class="text-3xl font-bold text-red-600">{{ rechazadas }}</p>
+    </div>
+  </div>
+
+  <!-- Reservas pendientes que requieren atención -->
+  <div class="mt-6">
+    <h2 class="text-2xl font-bold mb-4">Reservas Pendientes de Aprobación</h2>
+
+    {% if reservas_pendientes %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-4 py-2 text-left">ID</th>
+              <th class="px-4 py-2 text-left">Docente</th>
+              <th class="px-4 py-2 text-left">Laboratorio</th>
+              <th class="px-4 py-2 text-left">Fecha</th>
+              <th class="px-4 py-2 text-left">Horario</th>
+              <th class="px-4 py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reserva in reservas_pendientes %}
+            <tr class="border-t hover:bg-gray-50">
+              <td class="px-4 py-2">{{ reserva.id }}</td>
+              <td class="px-4 py-2">{{ reserva.docente.username }}</td>
+              <td class="px-4 py-2">{{ reserva.laboratorio.nombre }}</td>
+              <td class="px-4 py-2">{{ reserva.fecha }}</td>
+              <td class="px-4 py-2">{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+              <td class="px-4 py-2 text-center">
+                <a href="{% url 'camila:admin_reserva_detail' reserva.pk %}" class="text-blue-600 hover:underline">Ver/Aprobar</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600">No hay reservas pendientes de aprobación.</p>
+    {% endif %}
+
+    <div class="mt-4">
+      <a href="{% url 'camila:admin_reserva_list' %}" class="text-blue-600 hover:underline">Ver todas las reservas →</a>
+    </div>
+  </div>
+
+  <!-- Enlaces rápidos -->
+  <div class="mt-8 flex space-x-4">
+    <a href="{% url 'camila:admin_reserva_list' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+      Ver Todas las Reservas
+    </a>
+    <a href="{% url 'camila:admin_estadisticas' %}" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+      Ver Estadísticas
+    </a>
+    <a href="{% url 'camila:admin_export_csv' %}" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
+      Exportar CSV
+    </a>
+  </div>
+</div>
+{% endblock %}

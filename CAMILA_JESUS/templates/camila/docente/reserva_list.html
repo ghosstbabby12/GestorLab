@@ -1,0 +1,114 @@
+{% extends 'camila/base.html' %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+  <h1 class="text-3xl font-bold mb-6">Mis Reservas</h1>
+
+  <!-- Filtros -->
+  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1">Fecha</label>
+      <input type="date" name="fecha" value="{{ request.GET.fecha }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Laboratorio</label>
+      <select name="laboratorio" class="w-full border rounded px-3 py-2">
+        <option value="">Todos</option>
+        {% for lab in laboratorios %}
+          <option value="{{ lab.id }}" {% if request.GET.laboratorio == lab.id|stringformat:"s" %}selected{% endif %}>
+            {{ lab.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Estado</label>
+      <select name="estado" class="w-full border rounded px-3 py-2">
+        <option value="">Todos</option>
+        {% for estado in estados %}
+          <option value="{{ estado }}" {% if request.GET.estado == estado %}selected{% endif %}>{{ estado }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex items-end">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-2">Filtrar</button>
+      <a href="{% url 'camila:docente_reserva_list' %}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Limpiar</a>
+    </div>
+  </form>
+
+  <!-- Tabla de reservas -->
+  {% if reservas %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left">ID</th>
+            <th class="px-4 py-2 text-left">Laboratorio</th>
+            <th class="px-4 py-2 text-left">Fecha</th>
+            <th class="px-4 py-2 text-left">Horario</th>
+            <th class="px-4 py-2 text-left">Estado</th>
+            <th class="px-4 py-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reserva in reservas %}
+          <tr class="border-t hover:bg-gray-50">
+            <td class="px-4 py-2">{{ reserva.id }}</td>
+            <td class="px-4 py-2">{{ reserva.laboratorio.nombre }}</td>
+            <td class="px-4 py-2">{{ reserva.fecha }}</td>
+            <td class="px-4 py-2">{{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</td>
+            <td class="px-4 py-2">
+              <span class="px-2 py-1 rounded text-sm
+                {% if reserva.estado == 'Pendiente' %}bg-yellow-200 text-yellow-800
+                {% elif reserva.estado == 'Aprobada' %}bg-green-200 text-green-800
+                {% elif reserva.estado == 'Rechazada' %}bg-red-200 text-red-800
+                {% else %}bg-gray-200 text-gray-800{% endif %}">
+                {{ reserva.estado }}
+              </span>
+            </td>
+            <td class="px-4 py-2 text-center space-x-2">
+              <a href="{% url 'camila:docente_reserva_detail' reserva.pk %}" class="text-blue-600 hover:underline">Ver</a>
+              {% if reserva.estado == 'Pendiente' %}
+                <a href="{% url 'camila:docente_reserva_update' reserva.pk %}" class="text-green-600 hover:underline">Editar</a>
+                <form method="post" action="{% url 'camila:docente_reserva_cancelar' reserva.pk %}" class="inline" onsubmit="return confirm('¿Estás seguro de cancelar esta reserva?');">
+                  {% csrf_token %}
+                  <button type="submit" class="text-red-600 hover:underline">Cancelar</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <div class="mt-4 flex justify-center">
+      <div class="space-x-2">
+        {% if page_obj.has_previous %}
+          <a href="?page=1" class="px-3 py-1 border rounded">Primera</a>
+          <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border rounded">Anterior</a>
+        {% endif %}
+
+        <span class="px-3 py-1">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border rounded">Siguiente</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 border rounded">Última</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  {% else %}
+    <p class="text-gray-600">No se encontraron reservas con los filtros seleccionados.</p>
+  {% endif %}
+
+  <div class="mt-6">
+    <a href="{% url 'camila:docente_reserva_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+      Nueva Reserva
+    </a>
+  </div>
+</div>
+{% endblock %}

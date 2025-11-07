@@ -1,0 +1,39 @@
+{% extends 'camila/base.html' %}
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Detalles de la Reserva</h2>
+
+  <div class="space-y-2 text-gray-700">
+    <p><strong>Laboratorio:</strong> {{ reserva.laboratorio }}</p>
+    <p><strong>Fecha:</strong> {{ reserva.fecha }}</p>
+    <p><strong>Horario:</strong> {{ reserva.hora_inicio }} - {{ reserva.hora_fin }}</p>
+    <p><strong>Usuario:</strong> {{ reserva.usuario.username }}</p>
+    <p><strong>Estado:</strong>
+      <span class="capitalize px-2 py-1 rounded 
+        {% if reserva.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
+        {% elif reserva.estado == 'aprobada' %}bg-green-100 text-green-700
+        {% else %}bg-red-100 text-red-700{% endif %}">
+        {{ reserva.estado }}
+      </span>
+    </p>
+    <p><strong>Motivo:</strong> {{ reserva.motivo }}</p>
+  </div>
+
+  {% if user.is_staff %}
+  <hr class="my-4">
+  <form method="post" action="{% url 'camila:cambiar_estado' reserva.pk %}" class="flex space-x-3">
+    {% csrf_token %}
+    <button name="accion" value="aprobar" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+      Aprobar
+    </button>
+    <button name="accion" value="rechazar" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+      Rechazar
+    </button>
+  </form>
+  {% endif %}
+
+  <div class="mt-6">
+    <a href="{% url 'camila:reserva_list' %}" class="text-blue-600 hover:underline">← Volver al listado</a>
+  </div>
+</div>
+{% endblock %}

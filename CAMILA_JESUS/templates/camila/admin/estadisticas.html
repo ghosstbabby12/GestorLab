@@ -1,0 +1,109 @@
+{% extends 'camila/base.html' %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6">
+  <h1 class="text-3xl font-bold mb-6">Estadísticas de Uso</h1>
+
+  <!-- Resumen General -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">Resumen General</h2>
+    <div class="bg-blue-100 p-6 rounded">
+      <p class="text-4xl font-bold text-blue-600">{{ total }}</p>
+      <p class="text-gray-700">Total de reservas en el sistema</p>
+    </div>
+  </div>
+
+  <!-- Reservas por Estado -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">Reservas por Estado</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {% for item in por_estado %}
+        <div class="p-4 rounded
+          {% if item.estado == 'Pendiente' %}bg-yellow-100
+          {% elif item.estado == 'Aprobada' %}bg-green-100
+          {% elif item.estado == 'Rechazada' %}bg-red-100
+          {% else %}bg-gray-100{% endif %}">
+          <p class="text-2xl font-bold
+            {% if item.estado == 'Pendiente' %}text-yellow-600
+            {% elif item.estado == 'Aprobada' %}text-green-600
+            {% elif item.estado == 'Rechazada' %}text-red-600
+            {% else %}text-gray-600{% endif %}">
+            {{ item.total }}
+          </p>
+          <p class="text-gray-700">{{ item.estado }}</p>
+        </div>
+      {% empty %}
+        <p class="text-gray-600">No hay datos disponibles.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Laboratorios más Reservados -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">Laboratorios más Reservados (Top 10)</h2>
+    {% if por_laboratorio %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-4 py-2 text-left">Posición</th>
+              <th class="px-4 py-2 text-left">Laboratorio</th>
+              <th class="px-4 py-2 text-right">Total Reservas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in por_laboratorio %}
+            <tr class="border-t">
+              <td class="px-4 py-2">{{ forloop.counter }}</td>
+              <td class="px-4 py-2">{{ item.laboratorio__nombre }}</td>
+              <td class="px-4 py-2 text-right font-bold">{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600">No hay datos disponibles.</p>
+    {% endif %}
+  </div>
+
+  <!-- Docentes más Activos -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">Docentes más Activos (Top 10)</h2>
+    {% if docentes_activos %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-4 py-2 text-left">Posición</th>
+              <th class="px-4 py-2 text-left">Docente</th>
+              <th class="px-4 py-2 text-right">Total Reservas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in docentes_activos %}
+            <tr class="border-t">
+              <td class="px-4 py-2">{{ forloop.counter }}</td>
+              <td class="px-4 py-2">{{ item.docente__username }}</td>
+              <td class="px-4 py-2 text-right font-bold">{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600">No hay datos disponibles.</p>
+    {% endif %}
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="mt-8 flex space-x-4">
+    <a href="{% url 'camila:admin_dashboard' %}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">
+      Volver al Dashboard
+    </a>
+    <a href="{% url 'camila:admin_export_csv' %}" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+      Exportar todas las reservas a CSV
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'camila/base.html' %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6 max-w-2xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6">
+    {% if form.instance.pk %}Editar Reserva{% else %}Nueva Reserva{% endif %}
+  </h1>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% for field in form %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium mb-1">
+          {{ field.label }}
+        </label>
+        {{ field }}
+        {% if field.errors %}
+          <p class="text-red-600 text-sm mt-1">{{ field.errors.0 }}</p>
+        {% endif %}
+        {% if field.help_text %}
+          <p class="text-gray-500 text-sm mt-1">{{ field.help_text }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <div class="flex space-x-4 mt-6">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %} Reserva
+      </button>
+      <a href="{% url 'camila:docente_reserva_list' %}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">
+        Cancelar
+      </a>
+    </div>
+  </form>
+
+  {% if form.instance.pk %}
+    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
+      <p class="text-sm text-yellow-800">
+        <strong>Nota:</strong> Solo puedes editar reservas en estado "Pendiente". Esta reserva está en estado: <strong>{{ form.instance.estado }}</strong>
+      </p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

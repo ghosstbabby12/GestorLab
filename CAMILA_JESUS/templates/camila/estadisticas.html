@@ -1,0 +1,26 @@
+{% extends 'camila/base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Estadísticas de Reservas</h1>
+
+<div class="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto">
+  <p class="mb-4 text-gray-700">Total de reservas: <strong>{{ total }}</strong></p>
+
+  <h2 class="text-xl font-semibold mb-2">Por Estado:</h2>
+  <ul class="mb-6">
+    {% for e in por_estado %}
+      <li class="text-gray-700">{{ e.estado|capfirst }}: <strong>{{ e.total }}</strong></li>
+    {% empty %}
+      <li>No hay datos.</li>
+    {% endfor %}
+  </ul>
+
+  <h2 class="text-xl font-semibold mb-2">Top Laboratorios más usados:</h2>
+  <ul>
+    {% for lab in por_laboratorio %}
+      <li class="text-gray-700">{{ lab.laboratorio }}: <strong>{{ lab.total }}</strong> reservas</li>
+    {% empty %}
+      <li>No hay datos.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

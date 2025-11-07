@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Sistema de Reservas{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .badge-pendiente { background-color: #FEF3C7; color: #92400E; }
+    .badge-aprobada { background-color: #D1FAE5; color: #065F46; }
+    .badge-rechazada { background-color: #FEE2E2; color: #991B1B; }
+    .badge-cancelada { background-color: #E5E7EB; color: #374151; }
+
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: #667eea;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+
+  <!-- Navbar moderna -->
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo y título -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+          <a href="{% url 'camila:home' %}" class="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Sistema de Reservas
+          </a>
+        </div>
+
+        <!-- Navegación -->
+        <div class="flex items-center space-x-6">
+          {% if user.is_authenticated %}
+            <!-- Usuario info -->
+            <div class="flex items-center space-x-2 text-gray-600">
+              <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-white font-semibold text-sm">
+                {{ user.username|slice:":1"|upper }}
+              </div>
+              <span class="font-medium">{{ user.username }}</span>
+            </div>
+
+            {% if user.is_staff %}
+              <!-- Menú Admin -->
+              <a href="{% url 'camila:admin_dashboard' %}" class="nav-link text-gray-700 hover:text-indigo-600 font-medium">Dashboard</a>
+              <a href="{% url 'camila:admin_reserva_list' %}" class="nav-link text-gray-700 hover:text-indigo-600 font-medium">Reservas</a>
+              <a href="{% url 'camila:admin_estadisticas' %}" class="nav-link text-gray-700 hover:text-indigo-600 font-medium">Estadísticas</a>
+            {% else %}
+              <!-- Menú Docente -->
+              <a href="{% url 'camila:docente_dashboard' %}" class="nav-link text-gray-700 hover:text-indigo-600 font-medium">Dashboard</a>
+              <a href="{% url 'camila:docente_reserva_list' %}" class="nav-link text-gray-700 hover:text-indigo-600 font-medium">Mis Reservas</a>
+              <a href="{% url 'camila:docente_reserva_create' %}" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition duration-300 font-medium">
+                + Nueva Reserva
+              </a>
+            {% endif %}
+
+            <a href="{% url 'logout' %}" class="text-red-500 hover:text-red-700 font-medium transition duration-300">Salir</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition duration-300 font-medium">
+              Iniciar Sesión
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mensajes -->
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      {% for message in messages %}
+        <div class="rounded-lg p-4 mb-3 shadow-md {% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-800{% endif %}">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ message }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Contenido principal -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer moderno -->
+  <footer class="bg-white border-t border-gray-200 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex justify-between items-center">
+        <p class="text-gray-600 text-sm">
+          © 2025 Sistema de Reservas - CAMILA & JESUS
+        </p>
+        <div class="flex space-x-6">
+          <span class="text-gray-400 text-sm">Versión 1.0</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
