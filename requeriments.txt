@@ -1,0 +1,17 @@
+# Dependencias base de Django
+Django==5.2.8
+asgiref==3.10.0
+sqlparse==0.5.3
+
+# Servidor WSGI para producción
+gunicorn
+
+# Herramientas para manejo de base de datos en Render
+psycopg2-binary
+dj-database-url
+
+# Variables de entorno seguras
+python-decouple
+
+# Archivos estáticos en producción
+whitenoise
