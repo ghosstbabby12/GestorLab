@@ -9,40 +9,49 @@ import os
 import dj_database_url
 from decouple import config
 
-# ----------------------------
-# RUTAS Y CONFIGURACIÓN BASE
-# ----------------------------
+# ===========================
+# BASE Y RUTAS
+# ===========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ----------------------------
+# ===========================
 # SEGURIDAD
-# ----------------------------
-# En producción, Render gestionará SECRET_KEY y DEBUG mediante variables de entorno.
+# ===========================
 SECRET_KEY = config('SECRET_KEY', default='inseguro_dev_key')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', config('RENDER_EXTERNAL_HOSTNAME', default='')]
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    config('RENDER_EXTERNAL_HOSTNAME', default='')
+]
 
-# ----------------------------
-# APLICACIONES INSTALADAS
-# ----------------------------
+# Elimina posibles cadenas vacías
+ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]
+
+# ===========================
+# APLICACIONES
+# ===========================
 INSTALLED_APPS = [
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # App local
     'CAMILA_JESUS',
 ]
 
-# ----------------------------
+# ===========================
 # MIDDLEWARE
-# ----------------------------
+# ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Para servir archivos estáticos en Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ necesario para Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,13 +62,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'PROYECTO_CAMILA_JESUS.urls'
 
-# ----------------------------
+# ===========================
 # TEMPLATES
-# ----------------------------
+# ===========================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # ✅ Puedes poner plantillas globales aquí
+        'DIRS': [BASE_DIR / 'templates'],  # Plantillas globales
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,18 +83,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'PROYECTO_CAMILA_JESUS.wsgi.application'
 
-# ----------------------------
+# ===========================
 # BASE DE DATOS
-# ----------------------------
+# ===========================
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=False
     )
 }
 
-# ----------------------------
+# ===========================
 # VALIDACIÓN DE CONTRASEÑAS
-# ----------------------------
+# ===========================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -93,29 +104,43 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ----------------------------
+# ===========================
 # INTERNACIONALIZACIÓN
-# ----------------------------
+# ===========================
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
-# ----------------------------
+# ===========================
 # ARCHIVOS ESTÁTICOS
-# ----------------------------
+# ===========================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise optimizado
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ----------------------------
+# ===========================
 # AUTENTICACIÓN
-# ----------------------------
+# ===========================
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_URL = '/accounts/login/'
 
-# ----------------------------
+# ===========================
 # CLAVE PRIMARIA POR DEFECTO
-# ----------------------------
+# ===========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ===========================
+# CONFIG EXTRA PARA DEPLOY EN RENDER
+# ===========================
+if not DEBUG:
+    # Seguridad adicional en producción
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
